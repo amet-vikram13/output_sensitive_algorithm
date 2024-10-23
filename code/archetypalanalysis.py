@@ -199,3 +199,19 @@ def FurthestSum(X, k):
         pool.remove(i)
         chosen.append(i)
     return chosen
+
+# finds two points that are farthest apart
+# using L2 norm (Euclidian norm)
+def farthestPointsUsingL2Norm(X):
+    n = X.shape[0]
+    max_dist = 0
+    p1 = 0
+    p2 = 0
+    for i in range(n):
+        for j in range(i+1, n):
+            dist = np.linalg.norm(X[i] - X[j])
+            if dist > max_dist:
+                max_dist = dist
+                p1 = i
+                p2 = j
+    return [p1, p2]
