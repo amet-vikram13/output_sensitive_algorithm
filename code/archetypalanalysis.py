@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import gurobipy as gp
+from gurobipy import GRB
 from tqdm import tqdm
 
 try:
@@ -158,6 +160,86 @@ def weightedArchetypalAnalysis(
 
     return Z, A, B, rss[1:]
 
+def outputSensitiveAnalysis(X, ind_E, ind_S, k, m):
+    for s in range(len(ind_S)):
+        if not isConvexCombination(X, ind_E, ind_S[s]):
+            witness_vector = findWitnessVector(X, ind_E, ind_S[s])
+            if witness_vector is not None:
+                max_dot_product = -np.inf
+                p_prime = None
+                for p in range(len(ind_S)):
+                    if p != s:
+                        dot_product = np.dot(witness_vector, X[ind_S[p]])
+                        if dot_product > max_dot_product:
+                            max_dot_product = dot_product
+                            p_prime = p
+                if p_prime is not None:
+                    ind_E.append(p_prime)
+                    ind_S.remove(p_prime)
+    return ind_E
+
+def isConvexCombination(X, ind_E, s):
+    E = X[ind_E].copy()
+    P = X[s].copy()
+
+    # initialze the dimensions of the data
+    k = E.shape[0]
+    d = E.shape[1]
+
+    # initialize the optimization model and parameters
+    model = gp.Model()
+    model.setParam('OutputFlag', 0)
+    lambdas = model.addVars(k, vtype=GRB.CONTINUOUS, lb=0, ub=1, name="lambda")
+
+    # add the model constraints
+    for j in range(d):
+            model.addConstr(gp.quicksum(lambdas[i] * E[i][j] for i in range(k)) == P[j], f"dot_{j}")
+
+    # add the dummy objective function
+    model.setObjective(0, GRB.MINIMIZE)
+
+    # optimize the model
+    model.optimize()
+
+    if model.status == GRB.OPTIMAL:
+        return True
+    else:
+        return False
+
+def findWitnessVector(X, ind_E, s):
+    E = X[ind_E].copy()
+    P = X[s].copy()
+
+    # initialze the dimensions of the data
+    k = E.shape[0]
+    d = E.shape[1]
+
+    # initialize the optimization model and parameters
+    model = gp.Model()
+    model.setParam('OutputFlag', 0)
+
+    # Add variables for the witness vector n
+    N = model.addVars(d, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="N")
+
+    # Add the model constraints -- that is k equations representing the dot product of the witness vector
+    # with each row vector of E less than or equal to the dot product of the witness vector with P
+    for i in range(k):
+        model.addConstr(gp.quicksum(N[j] * E[i][j] for j in range(d)) <= gp.quicksum(N[j] * P[j] for j in range(d)), f"equation_{i}")
+
+    # add the model constraints -- that is the sum of the witness vector
+    # is greater than 0 so that it is not the zero vector
+    model.addConstr(gp.quicksum(N[j] for j in range(d)) >= 0,f"sum")
+
+    # add the dummy objective function
+    model.setObjective(0, GRB.MINIMIZE)
+
+    # optimize the model
+    model.optimize()
+
+    if model.status == GRB.OPTIMAL:
+        return np.array([model.getVars()[j].X for j in range(d)])
+    else:
+        return None
 
 def FurthestSum(X, k):
     # Archetypal Analysis for Machine Learning
