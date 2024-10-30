@@ -200,18 +200,18 @@ def FurthestSum(X, k):
         chosen.append(i)
     return chosen
 
-# finds two points that are farthest apart
-# using L2 norm (Euclidian norm)
-def farthestPointsUsingL2Norm(X):
+# finds set of points that are farthest apart
+# using simple min max along each dimension of X
+def farthestPointsSetUsingMinMax(X):
     n = X.shape[0]
-    max_dist = 0
-    p1 = 0
-    p2 = 0
-    for i in range(n):
-        for j in range(i+1, n):
-            dist = np.linalg.norm(X[i] - X[j])
-            if dist > max_dist:
-                max_dist = dist
-                p1 = i
-                p2 = j
-    return [p1, p2]
+    d = X.shape[1]
+
+    ind_E = set()
+
+    for i in range(d):
+        p1 = X[:,i].argmin()
+        p2 = X[:,i].argmax()
+        ind_E.add(p1)
+        ind_E.add(p2)
+
+    return list(ind_E)

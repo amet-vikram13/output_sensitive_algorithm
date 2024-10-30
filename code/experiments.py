@@ -146,16 +146,17 @@ def experiment_AA_lucic_coreset(X, k, m, repetitions):
         res.append(rss)
     return res, res_time
 
+@ray.remote
 def experiment_AA_output_sensitive(X, k, m, repetitions):
     res = []
     res_time = []
     for i in range(repetitions):
         t_start = time()
-        # initialize two extreme points via farthestPointsUsingL2Norm function
+        # initialize two extreme points via farthestPointsSetUsingMinMax function
         # maintain the intialized indices as set E. Note: len(E) < len(X)
         # maintin the indices not belonging to E as set S. Note: len(S) = len(X) - len(E)
         # any index not belonging to E is a candidate for the next archetype
-        ind_E = farthestPointsUsingL2Norm(X)
+        ind_E = farthestPointsSetUsingMinMax(X)
         ind_S = np.setdiff1d(np.arange(len(X)), np.array(ind_E))
 
         #Z, A, B, rss = ArchetypalAnalysis_output_sensitive(X, ind_E, ind_S, k, m)
