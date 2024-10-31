@@ -226,9 +226,10 @@ def findWitnessVector(X, ind_E, s):
     for i in range(k):
         model.addConstr(gp.quicksum(N[j] * E[i][j] for j in range(d)) <= gp.quicksum(N[j] * P[j] for j in range(d)), f"equation_{i}")
 
-    # add the model constraints -- that is the sum of the witness vector
-    # is greater than 0 so that it is not the zero vector
-    model.addConstr(gp.quicksum(N[j] for j in range(d)) >= 0,f"sum")
+    # adding the norm-2 constraint for the witness vector such that
+    # L2 norm of the witness vector is 1.
+    # NOTE: This is a non linear constraint.
+    model.addConstr(gp.quicksum(N[j] * N[j] for j in range(d)) == 1, "norm-2")
 
     # add the dummy objective function
     model.setObjective(0, GRB.MINIMIZE)

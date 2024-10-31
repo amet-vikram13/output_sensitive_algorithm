@@ -1,20 +1,65 @@
 from archetypalanalysis import farthestPointsSetUsingMinMax
+from archetypalanalysis import isConvexCombination
+from archetypalanalysis import findWitnessVector
 import numpy as np
 
-def getPreData():
+def getPreData_X():
     return np.array([[1,2,3],[3,4,5],[5,6,7]])
+
+def getPreData_ind_E():
+    return [0, 2]
+
+def getPreData_s():
+    return 1
 
 # For array X = [[1,2,3],[3,4,5],[5,6,7]]
 # the farthest points are [1,2,3] and [5,6,7]
 # so the indices of these points are 0 and 2
 def test_farthestPointsSetUsingMinMax():
-    X = getPreData()
+    X = getPreData_X()
     ind_E = farthestPointsSetUsingMinMax(X)
-    assert ind_E == [0, 2]
-    print("----- farthestPointsSetUsingMinMax() passed -----")
+    assert ind_E == getPreData_ind_E()
+    print("----- farthestPointsSetUsingMinMax() passed -----\n")
+
+# For array X = [[1,2,3],[3,4,5],[5,6,7]]
+# the convex combination of [3,4,5] is a
+# convex combination of [1,2,3] and [5,6,7]
+# with values of lambda as [0.5, 0.5]
+def test_isConvexCombination():
+    X = getPreData_X()
+    ind_E = getPreData_ind_E()
+    s = getPreData_s()
+    assert isConvexCombination(X, ind_E, s)==True
+    print("----- isConvexCombination() passed -----\n")
+
+# For array X = [[1,2,3],[3,4,5],[5,6,7]]
+# array [5,6,7] is not a convex combination
+# of remaining two.
+def test_isNotConvexCombination():
+    X = getPreData_X()
+    ind_E = [0, 1]
+    s = 2
+    assert isConvexCombination(X, ind_E, s)==False
+    print("----- isNotConvexCombination() passed -----\n")
+
+# For array X = [[1,2,3],[3,4,5],[5,6,7]]
+# array [5, 6, 7] is not a convex combination
+# and so a witness vector can be found, which maximizes
+# the dot product of the witness vector with [5, 6, 7]
+def test_findWitnessVector():
+    X = getPreData_X()
+    ind_E = [0,1]
+    s = 2
+    witness_vector = findWitnessVector(X, ind_E, s)
+    assert witness_vector is not None
+    print("Witness Vector: ", witness_vector)
+    print("----- findWitnessVector() passed -----\n")
 
 def run_tests():
     test_farthestPointsSetUsingMinMax()
+    test_isConvexCombination()
+    test_isNotConvexCombination()
+    test_findWitnessVector()
 
 if __name__ == "__main__":
     run_tests()
