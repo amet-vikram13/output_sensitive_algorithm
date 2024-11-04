@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-data_path = "/home/sebastian/data/"
-results_path = "/home/sebastian/test/run/"
+data_path = "/Users/amvik13/Downloads/AA/data/"
+results_path = "/Users/amvik13/Downloads/AA/results/"
 
 # specify list of sample sizes m
 M = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000]
