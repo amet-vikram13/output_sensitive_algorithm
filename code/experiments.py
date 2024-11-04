@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import ray
-import numpy as np
-from tqdm import tqdm
 from time import time
 
-from coresets import *
+import ray
+
 from archetypalanalysis import *
+from coresets import *
 
 
 def experiment_AA_full(X, k):
@@ -146,21 +145,21 @@ def experiment_AA_lucic_coreset(X, k, m, repetitions):
         res.append(rss)
     return res, res_time
 
-def experiment_AA_output_sensitive(X, k):
+def experiment_AA_clarkson_coreset(X, k):
     res = []
     res_time = []
 
     t_start = time()
 
     # initialize two extreme points via farthestPointsSetUsingMinMax function
-    # maintain the intialized indices as set E. Note: len(E) < len(X)
+    # maintain the initialized indices as set E. Note: len(E) < len(X)
     # maintain the indices not belonging to E as set S. Note: len(S) = len(X) - len(E)
     # any index not belonging to E is a candidate for the next coreset
     ind_E = farthestPointsSetUsingMinMax(X)
     ind_S = np.setdiff1d(np.arange(len(X)), np.array(ind_E))
 
-    # obtain initial coreset using output sensitive algorithm
-    X_C = output_sensitive_coreset(X, ind_E, ind_S)
+    # obtain initial coreset using Clarkson's algorithm
+    X_C = clarkson_coreset(X, ind_E, ind_S)
 
     # initialize archetypes via FurthestSum
     ind = FurthestSum(X_C, k)

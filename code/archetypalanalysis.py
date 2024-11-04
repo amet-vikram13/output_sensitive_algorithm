@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import numpy as np
 import gurobipy as gp
+import numpy as np
 from gurobipy import GRB
 from tqdm import tqdm
 
@@ -164,7 +164,7 @@ def isConvexCombination(X, ind_E, s):
     E = X[ind_E].copy()
     P = X[s].copy()
 
-    # initialze the dimensions of the data
+    # initialize the dimensions of the data
     k = E.shape[0]
     d = E.shape[1]
 
@@ -192,7 +192,7 @@ def findWitnessVector(X, ind_E, s):
     E = X[ind_E].copy()
     P = X[s].copy()
 
-    # initialze the dimensions of the data
+    # initialize the dimensions of the data
     k = E.shape[0]
     d = E.shape[1]
 
