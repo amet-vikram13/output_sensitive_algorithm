@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from archetypalanalysis import isConvexCombination
+from archetypalanalysis import findWitnessVector
 
 
 # "uniform" in the paper
@@ -80,3 +82,25 @@ def coreset(X, m):
     X_C = X[ind]
     w_C = 1 / (m * q[ind])
     return X_C, w_C
+
+def output_sensitive_coreset(X, ind_E, ind_S):
+    while not ind_S.empty():
+        s = ind_S.pop(0)
+        if not isConvexCombination(X, ind_E, s):
+            witness_vector = findWitnessVector(X, ind_E, s)
+            if witness_vector is not None:
+                max_dot_product = np.dot(witness_vector, X[s])
+                p_prime = None
+                for p in range(len(ind_S)):
+                    dot_product = np.dot(witness_vector, X[ind_S[p]])
+                    if dot_product > max_dot_product:
+                        max_dot_product = dot_product
+                        p_prime = p
+                if p_prime is not None:
+                    ind_E.append(p_prime)
+                    ind_S.append(s)
+                    ind_S.remove(p_prime)
+                else:
+                    ind_E.append(s)
+    X_C = X[ind_E].copy()
+    return X_C

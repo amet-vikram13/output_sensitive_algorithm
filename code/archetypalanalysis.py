@@ -160,24 +160,6 @@ def weightedArchetypalAnalysis(
 
     return Z, A, B, rss[1:]
 
-def outputSensitiveAnalysis(X, ind_E, ind_S, k, m):
-    for s in range(len(ind_S)):
-        if not isConvexCombination(X, ind_E, ind_S[s]):
-            witness_vector = findWitnessVector(X, ind_E, ind_S[s])
-            if witness_vector is not None:
-                max_dot_product = -np.inf
-                p_prime = None
-                for p in range(len(ind_S)):
-                    if p != s:
-                        dot_product = np.dot(witness_vector, X[ind_S[p]])
-                        if dot_product > max_dot_product:
-                            max_dot_product = dot_product
-                            p_prime = p
-                if p_prime is not None:
-                    ind_E.append(p_prime)
-                    ind_S.remove(p_prime)
-    return ind_E
-
 def isConvexCombination(X, ind_E, s):
     E = X[ind_E].copy()
     P = X[s].copy()
