@@ -156,7 +156,7 @@ def experiment_AA_clarkson_coreset(X, k):
     # maintain the indices not belonging to E as set S. Note: len(S) = len(X) - len(E)
     # any index not belonging to E is a candidate for the next coreset
     ind_E = farthestPointsSetUsingMinMax(X)
-    ind_S = np.setdiff1d(np.arange(len(X)), np.array(ind_E))
+    ind_S = np.setdiff1d(np.arange(len(X)), np.array(ind_E)).tolist()
 
     # obtain initial coreset using Clarkson's algorithm
     X_C = clarkson_coreset(X, ind_E, ind_S)

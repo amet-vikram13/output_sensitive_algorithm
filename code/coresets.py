@@ -87,7 +87,7 @@ def coreset(X, m):
 # proposed coreset
 # "clarkson-cs" in the paper "More output-sensitive geometric algorithms"
 def clarkson_coreset(X, ind_E, ind_S):
-    while not ind_S.empty():
+    while not ind_S:
         s = ind_S.pop(0)
         if not isConvexCombination(X, ind_E, s):
             witness_vector = findWitnessVector(X, ind_E, s)
