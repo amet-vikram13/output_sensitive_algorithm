@@ -21,7 +21,7 @@ for k in [25, 100]:
     print("Archetypal Analysis on clarkson coreset")
     res_clarkson_coreset = []
     time_clarkson_coreset = []
-    rss_full_clarkson, time_full_clarkson = experiment_AA_clarkson_coreset(X, k)
+    rss_full_clarkson, time_full_clarkson, clarkson_cs_size = experiment_AA_clarkson_coreset(X, k)
 
     # Archetypal Analysis on all data
     print("Archetypal Analysis on all data")
@@ -90,5 +90,6 @@ for k in [25, 100]:
         rss_coreset=rss_coreset,
         time_coreset=time_coreset,
         rss_full_clarkson=rss_full_clarkson,
-        time_full_clarkson=time_full_clarkson
+        time_full_clarkson=time_full_clarkson,
+        clarkson_cs_size=clarkson_cs_size
     )

@@ -178,7 +178,7 @@ def experiment_AA_clarkson_coreset(X, k):
     # measure the error on all data
     rss = RSS_Z(X, A, Z)
 
-    return rss, runtime
+    return rss, runtime, len(X_C)
 
 def experiment_AA_uniform_sample_parallel(X, k, m, repetitions, parallel=10):
     reps = int(repetitions / parallel)
