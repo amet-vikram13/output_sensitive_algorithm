@@ -168,24 +168,28 @@ def isConvexCombination(X, ind_E, s):
     k = E.shape[0]
     d = E.shape[1]
 
-    # initialize the optimization model and parameters
-    model = gp.Model()
+    # initialize the model and parameters
+    model = gp.Model("ConvexCombination")
     model.setParam('OutputFlag', 0)
-    lambdas = model.addVars(k, vtype=GRB.CONTINUOUS, lb=0, ub=1, name="lambda")
 
-    # add the model constraints
-    for j in range(d):
-            model.addConstr(gp.quicksum(lambdas[i] * E[i][j] for i in range(k)) == P[j], f"dot_{j}")
+    # adding model variables -- the lambda coefficients of the convex combination equation should be between 0 and 1
+    lambdas = model.addMVar((k,), lb=0.0, ub=1.0, vtype=GRB.CONTINUOUS, name="lambdas")
 
-    # add the dummy objective function
-    model.setObjective(0, GRB.MINIMIZE)
+    # adding model constraints -- the sum of the lambda coefficients should be 1
+    model.addConstr(lambdas.sum() == 1, name="sum_of_lambdas")
+
+    # adding model constraints -- the convex combination equation => E.T x lambdas = P
+    model.addMConstr(E.T, lambdas, '=', P, "convex_combination_equation")
 
     # optimize the model
+    # model.write("_gurobi_lp/convex_combination.lp")
     model.optimize()
 
     if model.status == GRB.OPTIMAL:
         return True
     else:
+        # model.computeIIS()
+        # model.write("_gurobi_lp/convex_combination.ilp")
         return False
 
 def findWitnessVector(X, ind_E, s):
@@ -197,31 +201,32 @@ def findWitnessVector(X, ind_E, s):
     d = E.shape[1]
 
     # initialize the optimization model and parameters
-    model = gp.Model()
+    model = gp.Model("WitnessVector")
     model.setParam('OutputFlag', 0)
 
     # Add variables for the witness vector n
-    N = model.addVars(d, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, ub=GRB.INFINITY, name="N")
+    N = model.addMVar((d,), lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="N")
 
     # Add the model constraints -- that is k equations representing the dot product of the witness vector
     # with each row vector of E less than or equal to the dot product of the witness vector with P
     for i in range(k):
-        model.addConstr(gp.quicksum(N[j] * E[i][j] for j in range(d)) <= gp.quicksum(N[j] * P[j] for j in range(d)), f"equation_{i}")
+        model.addConstr(E[i] @ N <= P @ N, f"dot_equation_{i}")
 
     # adding the norm-2 constraint for the witness vector such that
     # L2 norm of the witness vector is 1.
     # NOTE: This is a non linear constraint.
-    model.addConstr(gp.quicksum(N[j] * N[j] for j in range(d)) == 1, "norm-2")
-
-    # add the dummy objective function
-    model.setObjective(0, GRB.MINIMIZE)
+    res = model.addVar(lb=1.0, ub=1.0, vtype=GRB.CONTINUOUS, name="result_norm-2")
+    model.addGenConstrNorm(res, N, 2, "witness_vector_norm-2")
 
     # optimize the model
+    # model.write("_gurobi_lp/witness_vector.lp")
     model.optimize()
 
     if model.status == GRB.OPTIMAL:
         return np.array([model.getVars()[j].X for j in range(d)])
     else:
+        # model.computeIIS()
+        # model.write("_gurobi_lp/witness_vector.ilp")
         return None
 
 def FurthestSum(X, k):
