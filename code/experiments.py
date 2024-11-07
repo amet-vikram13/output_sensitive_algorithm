@@ -145,7 +145,7 @@ def experiment_AA_lucic_coreset(X, k, m, repetitions):
         res.append(rss)
     return res, res_time
 
-def experiment_AA_clarkson_coreset(X, k):
+def experiment_AA_clarkson_coreset(X, k, dataset):
     res = []
     res_time = []
 
@@ -159,7 +159,7 @@ def experiment_AA_clarkson_coreset(X, k):
     ind_S = np.setdiff1d(np.arange(len(X)), np.array(ind_E)).tolist()
 
     # obtain initial coreset using Clarkson's algorithm
-    X_C = clarkson_coreset(X, ind_E, ind_S)
+    X_C = clarkson_coreset(X, ind_E, ind_S, dataset)
 
     # initialize archetypes via FurthestSum
     ind = FurthestSum(X_C, k)

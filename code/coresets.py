@@ -5,6 +5,9 @@ import numpy as np
 
 from archetypalanalysis import findWitnessVector
 from archetypalanalysis import isConvexCombination
+from experiment_settings import data_path
+from time import time
+from tqdm import tqdm
 
 
 # "uniform" in the paper
@@ -86,26 +89,39 @@ def coreset(X, m):
 
 # proposed coreset
 # "clarkson-cs" in the paper "More output-sensitive geometric algorithms"
-def clarkson_coreset(X, ind_E, ind_S):
-    while len(ind_S) > 0:
-        # print("Length of E: ", len(ind_E))
-        # print("Length of S: ", len(ind_S))
-        s = ind_S.pop(0)
-        if not isConvexCombination(X, ind_E, s):
-            witness_vector = findWitnessVector(X, ind_E, s)
-            if witness_vector is not None:
-                max_dot_product = np.dot(witness_vector, X[s])
-                p_prime = None
-                for p in ind_S:
-                    dot_product = np.dot(witness_vector, X[p])
-                    if dot_product > max_dot_product:
-                        max_dot_product = dot_product
-                        p_prime = p
-                if p_prime is not None:
-                    ind_E.append(p_prime)
-                    ind_S.append(s)
-                    ind_S.remove(p_prime)
-                else:
-                    ind_E.append(s)
-    X_C = X[ind_E].copy()
-    return X_C
+def clarkson_coreset(X, ind_E, ind_S, dataset_name):
+    X_C = np.empty_like(X)
+    try:
+        data = np.load(data_path + dataset_name + "_clarkson_coreset.npz")
+        X_C = data["X"]
+    except FileNotFoundError:
+        t_start = time()
+        with tqdm(total=len(ind_S)) as pbar:
+            while len(ind_S) > 0:
+                s = ind_S.pop(0)
+                if not isConvexCombination(X, ind_E, s):
+                    witness_vector = findWitnessVector(X, ind_E, s)
+                    if witness_vector is not None:
+                        max_dot_product = np.dot(witness_vector, X[s])
+                        p_prime = None
+                        for p in ind_S:
+                            dot_product = np.dot(witness_vector, X[p])
+                            if dot_product > max_dot_product:
+                                max_dot_product = dot_product
+                                p_prime = p
+                        if p_prime is not None:
+                            ind_E.append(p_prime)
+                            ind_S.append(s)
+                            ind_S.remove(p_prime)
+                        else:
+                            ind_E.append(s)
+                pbar.update(1)
+        X_C = X[ind_E].copy()
+        t_end = time()
+        np.savez(
+            data_path + dataset_name + "_clarkson_coreset.npz",
+            X=X_C,
+            cs_time=t_end - t_start
+        )
+    finally:
+        return X_C
