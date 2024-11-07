@@ -103,9 +103,12 @@ def test_ijcnn1_clarkson_coreset():
 
     print("Applying clarkson coreset algorithm")
     # takes too long to run
+    t_start = time()
     X_C = clarkson_coreset(X, ind_E, ind_S)
+    t_end = time()
 
     print("Length of X_C: ", len(X_C))
+    print("Time taken: ", t_end-t_start)
 
 def run_tests():
     test_farthestPointsSetUsingMinMax()
