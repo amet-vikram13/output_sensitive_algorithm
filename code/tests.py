@@ -56,8 +56,10 @@ def test_findWitnessVector():
     print("Witness Vector: ", witness_vector)
     print("----- findWitnessVector() passed -----\n")
 
-def test_ijcnn1_convex_combination():
+def test_ijcnn1_convex_combination(m=1000):
     X, y = load_data("ijcnn1")
+
+    X = X[np.random.choice(X.shape[0], m, replace=False)]
 
     print("Applying farthestPointsSetUsingMinMax algorithm")
     ind_E = farthestPointsSetUsingMinMax(X)
@@ -77,8 +79,10 @@ def test_ijcnn1_convex_combination():
     print("Number of points in ind_S that are convex combinations of ind_E: ", cc_count)
     print("Number of points in ind_S that are not convex combinations of ind_E: ", ncc_count)
 
-def test_ijcnn1_witness_vector():
+def test_ijcnn1_witness_vector(m=1000):
     X, y = load_data("ijcnn1")
+
+    X = X[np.random.choice(X.shape[0], m, replace=False)]
 
     print("Applying farthestPointsSetUsingMinMax algorithm")
     ind_E = farthestPointsSetUsingMinMax(X)
@@ -92,8 +96,10 @@ def test_ijcnn1_witness_vector():
     for s in ind_S:
         print(findWitnessVector(X, ind_E, ind_S[s]))
 
-def test_ijcnn1_clarkson_coreset():
+def test_ijcnn1_clarkson_coreset(m=1000):
     X, y = load_data("ijcnn1")
+
+    X = X[np.random.choice(X.shape[0], m, replace=False)]
 
     print("Applying farthestPointsSetUsingMinMax algorithm")
     ind_E = farthestPointsSetUsingMinMax(X)
@@ -104,7 +110,7 @@ def test_ijcnn1_clarkson_coreset():
     print("Applying clarkson coreset algorithm")
     # takes too long to run
     t_start = time()
-    X_C = clarkson_coreset(X, ind_E, ind_S)
+    X_C = clarkson_coreset(X, ind_E, ind_S, "ijcnn1")
     t_end = time()
 
     print("Length of X_C: ", len(X_C))
@@ -117,7 +123,7 @@ def run_tests():
     test_findWitnessVector()
     # test_ijcnn1_convex_combination() # takes too long to run
     # test_ijcnn1_witness_vector() # takes too long to run
-    # test_ijcnn1_clarkson_coreset() # takes too long to run
+    # test_ijcnn1_clarkson_coreset(m=100) # takes too long to run
 
 if __name__ == "__main__":
     run_tests()
