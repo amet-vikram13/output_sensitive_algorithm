@@ -90,32 +90,35 @@ def coreset(X, m):
 # proposed coreset
 # "clarkson-cs" in the paper "More output-sensitive geometric algorithms"
 def clarkson_coreset(X, ind_E, ind_S, dataset_name):
-    X_C = np.empty_like(X)
+    X_C = np.empty(1,1)
     try:
         data = np.load(data_path + dataset_name + "_clarkson_coreset.npz")
         X_C = data["X"]
     except FileNotFoundError:
         t_start = time()
-        with tqdm(total=len(ind_S)) as pbar:
-            while len(ind_S) > 0:
-                s = ind_S.pop(0)
-                if not isConvexCombination(X, ind_E, s):
-                    witness_vector = findWitnessVector(X, ind_E, s)
-                    if witness_vector is not None:
-                        max_dot_product = np.dot(witness_vector, X[s])
-                        p_prime = None
-                        for p in ind_S:
-                            dot_product = np.dot(witness_vector, X[p])
-                            if dot_product > max_dot_product:
-                                max_dot_product = dot_product
-                                p_prime = p
-                        if p_prime is not None:
-                            ind_E.append(p_prime)
-                            ind_S.append(s)
-                            ind_S.remove(p_prime)
-                        else:
-                            ind_E.append(s)
-                pbar.update(1)
+        try:
+            with tqdm(total=len(ind_S)) as pbar:
+                while len(ind_S) > 0:
+                    s = ind_S.pop(0)
+                    if not isConvexCombination(X, ind_E, s):
+                        witness_vector = findWitnessVector(X, ind_E, s)
+                        if witness_vector is not None:
+                            max_dot_product = np.dot(witness_vector, X[s])
+                            p_prime = None
+                            for p in ind_S:
+                                dot_product = np.dot(witness_vector, X[p])
+                                if dot_product > max_dot_product:
+                                    max_dot_product = dot_product
+                                    p_prime = p
+                            if p_prime is not None:
+                                ind_E.append(p_prime)
+                                ind_S.append(s)
+                                ind_S.remove(p_prime)
+                            else:
+                                ind_E.append(s)
+                    pbar.update(1)
+        except Exception as e:
+            print(e)
         X_C = X[ind_E].copy()
         t_end = time()
         np.savez(
