@@ -90,7 +90,7 @@ def coreset(X, m):
 # proposed coreset
 # "clarkson-cs" in the paper "More output-sensitive geometric algorithms"
 def clarkson_coreset(X, ind_E, ind_S, dataset_name):
-    X_C = np.empty(1,1)
+    X_C = np.empty((1,1))
     try:
         data = np.load(data_path + dataset_name + "_clarkson_coreset.npz")
         X_C = data["X"]
