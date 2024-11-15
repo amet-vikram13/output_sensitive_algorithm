@@ -56,45 +56,32 @@ def test_findWitnessVector():
     print("Witness Vector: ", witness_vector)
     print("----- findWitnessVector() passed -----\n")
 
-def test_ijcnn1_convex_combination(m=1000):
+def test_ijcnn1_convex_combination_upper_bound():
     X, y = load_data("ijcnn1")
 
-    X = X[np.random.choice(X.shape[0], m, replace=False)]
+    s = np.random.choice(X.shape[0])
 
-    print("Applying farthestPointsSetUsingMinMax algorithm")
-    ind_E = farthestPointsSetUsingMinMax(X)
-    print("Length of ind_E: ", len(ind_E))
-    print(ind_E)
-    ind_S = np.setdiff1d(np.arange(len(X)), np.array(ind_E)).tolist()
+    ind_E = np.setdiff1d(np.arange(len(X)), s).tolist()
 
-    # print(isConvexCombination(X, ind_E, ind_S[0]))
+    t_start = time()
+    print("Is point s convex combination of remaining points:",isConvexCombination(X, ind_E, s))
+    t_end = time()
 
-    cc_count = 0
-    for s in ind_S:
-        if isConvexCombination(X, ind_E, s):
-            cc_count += 1
+    print("Time taken: ", t_end-t_start)
 
-    ncc_count = len(ind_S) - cc_count
 
-    print("Number of points in ind_S that are convex combinations of ind_E: ", cc_count)
-    print("Number of points in ind_S that are not convex combinations of ind_E: ", ncc_count)
-
-def test_ijcnn1_witness_vector(m=1000):
+def test_ijcnn1_witness_vector_upper_bound():
     X, y = load_data("ijcnn1")
 
-    X = X[np.random.choice(X.shape[0], m, replace=False)]
+    s = np.random.choice(X.shape[0])
 
-    print("Applying farthestPointsSetUsingMinMax algorithm")
-    ind_E = farthestPointsSetUsingMinMax(X)
-    print("Length of ind_E: ", len(ind_E))
-    print(ind_E)
-    ind_S = np.setdiff1d(np.arange(len(X)), np.array(ind_E)).tolist()
+    ind_E = np.setdiff1d(np.arange(len(X)), s).tolist()
 
-    # print(findWitnessVector(X, ind_E, ind_S[0]))
+    t_start = time()
+    print("Witness Vector for point s:",findWitnessVector(X, ind_E, s))
+    t_end = time()
 
-    # takes too long to run
-    for s in ind_S:
-        print(findWitnessVector(X, ind_E, ind_S[s]))
+    print("Time taken: ", t_end-t_start)
 
 def test_ijcnn1_clarkson_coreset(m=1000):
     X, y = load_data("ijcnn1")
@@ -121,8 +108,8 @@ def run_tests():
     test_isConvexCombination()
     test_isNotConvexCombination()
     test_findWitnessVector()
-    # test_ijcnn1_convex_combination() # takes too long to run
-    # test_ijcnn1_witness_vector() # takes too long to run
+    # test_ijcnn1_convex_combination_upper_bound()
+    # test_ijcnn1_witness_vector_upper_bound()
     # test_ijcnn1_clarkson_coreset(m=100) # takes too long to run
 
 if __name__ == "__main__":
