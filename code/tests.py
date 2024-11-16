@@ -57,7 +57,7 @@ def test_findWitnessVector():
     print("----- findWitnessVector() passed -----\n")
 
 def test_isConvexCombination_data(path):
-    X_c = np.load(path)
+    X_c = np.load(path).get("X")
     for i in range(len(X_c)):
         s = X_c[i]
         ind_E = np.setdiff1d(np.arange(len(X_c)), i).tolist()
