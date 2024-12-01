@@ -160,6 +160,11 @@ def weightedArchetypalAnalysis(
 
     return Z, A, B, rss[1:]
 
+# Determines whether a point s is a convex combination
+# of the points in the set E.
+# Returns None if s is a convex combination of E,
+# otherwise returns a witness vector that certifies
+# that s is not a convex combination of E.
 def isConvexCombination(X, ind_E, s):
     E = X[ind_E].copy()
     P = X[s].copy()
@@ -170,10 +175,10 @@ def isConvexCombination(X, ind_E, s):
 
     # initialize the model and parameters
     model = gp.Model("ConvexCombination")
-    model.setParam('OutputFlag', 0)
+    model.setParam("OutputFlag", 0)
 
     # adding model variables -- the lambda coefficients of the convex combination equation should be between 0 and 1
-    lambdas = model.addMVar((k,), lb=0.0, ub=1.0, vtype=GRB.CONTINUOUS, name="lambdas")
+    lambdas = model.addMVar((k,), lb=0.0, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="lambdas")
 
     # adding model constraints -- the sum of the lambda coefficients should be 1
     model.addConstr(lambdas.sum() == 1, name="sum_of_lambdas")
@@ -181,53 +186,30 @@ def isConvexCombination(X, ind_E, s):
     # adding model constraints -- the convex combination equation => E.T x lambdas = P
     model.addMConstr(E.T, lambdas, '=', P, "convex_combination_equation")
 
+    model.setParam("InfUnbdInfo", 1)
+
     # optimize the model
     # model.write("_gurobi_lp/convex_combination.lp")
     model.optimize()
 
     if model.status == GRB.OPTIMAL:
-        return True
+        return None
     else:
         # model.computeIIS()
         # model.write("_gurobi_lp/convex_combination.ilp")
-        return False
 
-def findWitnessVector(X, ind_E, s):
-    E = X[ind_E].copy()
-    P = X[s].copy()
-
-    # initialize the dimensions of the data
-    k = E.shape[0]
-    d = E.shape[1]
-
-    # initialize the optimization model and parameters
-    model = gp.Model("WitnessVector")
-    model.setParam('OutputFlag', 0)
-
-    # Add variables for the witness vector n
-    N = model.addMVar((d,), lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="N")
-
-    # Add the model constraints -- that is k equations representing the dot product of the witness vector
-    # with each row vector of E less than or equal to the dot product of the witness vector with P
-    for i in range(k):
-        model.addConstr(E[i] @ N <= P @ N, f"dot_equation_{i}")
-
-    # adding the norm-2 constraint for the witness vector such that
-    # L2 norm of the witness vector is 1.
-    # NOTE: This is a non linear constraint.
-    res = model.addVar(lb=1.0, ub=1.0, vtype=GRB.CONTINUOUS, name="result_norm-2")
-    model.addGenConstrNorm(res, N, 2, "witness_vector_norm-2")
-
-    # optimize the model
-    # model.write("_gurobi_lp/witness_vector.lp")
-    model.optimize()
-
-    if model.status == GRB.OPTIMAL:
-        return np.array([model.getVars()[j].X for j in range(d)])
-    else:
-        # model.computeIIS()
-        # model.write("_gurobi_lp/witness_vector.ilp")
-        return None
+        # Computing the Farkas dual, when model is infeasible.
+        # The Farkas dual is a certificate of infeasibility.
+        # It is a vector that satisfies the following conditions:
+        # y.T * A * x <= y.T * b
+        # when the original problem : A * x = b is infeasible.
+        # Here y will be our witness vector.
+        dual = []
+        for i in range(d):
+            constr = model.getConstrByName("convex_combination_equation[{}]".format(i))
+            assert constr is not None
+            dual.append(constr.getAttr(GRB.Attr.FarkasDual))
+        return np.array(dual)
 
 def FurthestSum(X, k):
     # Archetypal Analysis for Machine Learning

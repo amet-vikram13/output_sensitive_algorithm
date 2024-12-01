@@ -2,6 +2,7 @@ import numpy as np
 
 from experiments import *
 from utils import *
+from unittest import result
 
 
 def getPreData_X():
@@ -30,7 +31,7 @@ def test_isConvexCombination():
     X = getPreData_X()
     ind_E = getPreData_ind_E()
     s = getPreData_s()
-    assert isConvexCombination(X, ind_E, s)==True
+    assert isConvexCombination(X, ind_E, s) is None
     print("----- isConvexCombination() passed -----\n")
 
 # For array X = [[1,2,3],[3,4,5],[5,6,7]]
@@ -40,28 +41,16 @@ def test_isNotConvexCombination():
     X = getPreData_X()
     ind_E = [0, 1]
     s = 2
-    assert isConvexCombination(X, ind_E, s)==False
+    assert isConvexCombination(X, ind_E, s) is not None
     print("----- isNotConvexCombination() passed -----\n")
-
-# For array X = [[1,2,3],[3,4,5],[5,6,7]]
-# array [5, 6, 7] is not a convex combination
-# and so a witness vector can be found, which maximizes
-# the dot product of the witness vector with [5, 6, 7]
-def test_findWitnessVector():
-    X = getPreData_X()
-    ind_E = [0,1]
-    s = 2
-    witness_vector = findWitnessVector(X, ind_E, s)
-    assert witness_vector is not None
-    print("Witness Vector: ", witness_vector)
-    print("----- findWitnessVector() passed -----\n")
 
 def test_isConvexCombination_data(path):
     X_c = np.load(path).get("X")
     for i in range(len(X_c)):
-        s = X_c[i]
-        ind_E = np.setdiff1d(np.arange(len(X_c)), i).tolist()
-        assert isConvexCombination(X_c, ind_E, s)==True
+        print("Processing",i,"th point")
+        ind_E = np.arange(len(X_c)).tolist()
+        ind_E.remove(i)
+        assert isConvexCombination(X_c, ind_E, i) is not None
     print("----- isConvexCombination_data() passed -----\n")
 
 def test_ijcnn1_convex_combination_upper_bound():
@@ -72,28 +61,12 @@ def test_ijcnn1_convex_combination_upper_bound():
     ind_E = np.setdiff1d(np.arange(len(X)), s).tolist()
 
     t_start = time()
-    print("Is point s convex combination of remaining points:",isConvexCombination(X, ind_E, s))
+    print("Is point s convex combination of remaining points:",isConvexCombination(X, ind_E, s) is None)
     t_end = time()
 
     print("Time taken: ", t_end-t_start)
 
     print("----- ijcnn1_convex_combination_upper_bound() passed -----\n")
-
-
-def test_ijcnn1_witness_vector_upper_bound():
-    X, y = load_data("ijcnn1")
-
-    s = np.random.choice(X.shape[0])
-
-    ind_E = np.setdiff1d(np.arange(len(X)), s).tolist()
-
-    t_start = time()
-    print("Witness Vector for point s:",findWitnessVector(X, ind_E, s))
-    t_end = time()
-
-    print("Time taken: ", t_end-t_start)
-
-    print("----- ijcnn1_witness_vector_upper_bound() passed -----\n")
 
 def test_ijcnn1_clarkson_coreset(m=1000):
     X, y = load_data("ijcnn1")
@@ -121,13 +94,12 @@ def run_tests():
     test_farthestPointsSetUsingMinMax()
     test_isConvexCombination()
     test_isNotConvexCombination()
-    test_findWitnessVector()
 
     ## Special cases
     # test_ijcnn1_convex_combination_upper_bound()
-    # test_isConvexCombination_data(data_path + "ijcnn1_clarkson_coreset.npz")
-    # test_ijcnn1_witness_vector_upper_bound()
-    # test_ijcnn1_clarkson_coreset(m=100) # takes too long to run
+    # test_ijcnn1_clarkson_coreset(m=1679)
+    # test_isConvexCombination_data(results_path + "ijcnn1_clarkson_coreset.npz")
+
 
 if __name__ == "__main__":
     run_tests()
