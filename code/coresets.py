@@ -96,8 +96,11 @@ def clarkson_coreset(X, ind_E, ind_S, dataset_name):
     except FileNotFoundError:
         t_start = time()
         try:
-            pbar = tqdm(total=len(ind_S))
+            pbar = tqdm(total=len(ind_S), desc="clarkson-cs computation:")
             while len(ind_S) > 0:
+                if len(ind_E)%1000==0:
+                    pbar.write("Current Size of coreset: {}".format(len(ind_E)))
+                    pbar.write("Remaining points to process:: {}".format(len(ind_S)))
                 s = ind_S.pop(0)
                 witness_vector = isConvexCombination(X, ind_E, s)
                 if witness_vector is not None:
