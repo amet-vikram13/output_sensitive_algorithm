@@ -4,7 +4,7 @@
 import numpy as np
 
 from archetypalanalysis import isConvexCombination
-from experiment_settings import results_path
+from experiment_settings import coresets_path
 from time import time
 from tqdm import tqdm
 
@@ -91,7 +91,7 @@ def coreset(X, m):
 def clarkson_coreset(X, ind_E, ind_S, dataset_name):
     X_C = np.empty((1,1))
     try:
-        data = np.load(results_path + dataset_name + "_clarkson_coreset.npz")
+        data = np.load(coresets_path + dataset_name + "_clarkson_coreset.npz")
         X_C = data["X"]
     except FileNotFoundError:
         t_start = time()
@@ -124,7 +124,7 @@ def clarkson_coreset(X, ind_E, ind_S, dataset_name):
         X_C = X[ind_E].copy()
         t_end = time()
         np.savez(
-            results_path + dataset_name + "_clarkson_coreset.npz",
+            coresets_path + dataset_name + "_clarkson_coreset.npz",
             X=X_C,
             cs_time=t_end - t_start
         )
@@ -137,7 +137,7 @@ def clarkson_coreset(X, ind_E, ind_S, dataset_name):
 def mod_clarkson_coreset(X, ind_E, ind_S, dataset_name):
     X_C = np.empty((1,1))
     try:
-        data = np.load(results_path + dataset_name + "_clarkson_coreset.npz")
+        data = np.load(coresets_path + dataset_name + "_clarkson_coreset.npz")
         X_C = data["X"]
     except FileNotFoundError:
         t_start = time()
@@ -157,7 +157,7 @@ def mod_clarkson_coreset(X, ind_E, ind_S, dataset_name):
         X_C = X[ind_E].copy()
         t_end = time()
         np.savez(
-            results_path + dataset_name + "_clarkson_coreset.npz",
+            coresets_path + dataset_name + "_clarkson_coreset.npz",
             X=X_C,
             cs_time=t_end - t_start
         )
