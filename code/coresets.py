@@ -86,10 +86,11 @@ def coreset(X, m):
     w_C = 1 / (m * q[ind])
     return X_C, w_C
 
+
 # proposed coreset
 # "clarkson-cs" in the paper "More output-sensitive geometric algorithms"
 def clarkson_coreset(X, ind_E, ind_S, dataset_name):
-    X_C = np.empty((1,1))
+    X_C = np.empty((1, 1))
     try:
         data = np.load(coresets_path + dataset_name + "_clarkson_coreset.npz")
         X_C = data["X"]
@@ -98,9 +99,11 @@ def clarkson_coreset(X, ind_E, ind_S, dataset_name):
         try:
             pbar = tqdm(total=len(ind_S), desc="clarkson-cs computation:")
             while len(ind_S) > 0:
-                if len(ind_E)%1000==0:
-                    pbar.write("Current Size of coreset: {}".format(len(ind_E)))
-                    pbar.write("Remaining points to process:: {}".format(len(ind_S)))
+                if len(ind_E) % 1000 == 0:
+                    pbar.write(
+                        "Current Size of coreset: {}".format(len(ind_E)))
+                    pbar.write(
+                        "Remaining points to process:: {}".format(len(ind_S)))
                 s = ind_S.pop(0)
                 witness_vector = isConvexCombination(X, ind_E, s)
                 if witness_vector is not None:
@@ -118,39 +121,6 @@ def clarkson_coreset(X, ind_E, ind_S, dataset_name):
                     else:
                         ind_E.append(s)
                 pbar.update(1)
-            pbar.close()
-        except Exception as e:
-            print(e)
-        X_C = X[ind_E].copy()
-        t_end = time()
-        np.savez(
-            coresets_path + dataset_name + "_clarkson_coreset.npz",
-            X=X_C,
-            cs_time=t_end - t_start
-        )
-    finally:
-        return X_C
-
-# proposed coreset
-# modified "clarkson-cs" in the paper "More output-sensitive geometric algorithms"
-# The algorithm is modified and is not finding the witness vector for each point in the set S
-def mod_clarkson_coreset(X, ind_E, ind_S, dataset_name):
-    X_C = np.empty((1,1))
-    try:
-        data = np.load(coresets_path + dataset_name + "_clarkson_coreset.npz")
-        X_C = data["X"]
-    except FileNotFoundError:
-        t_start = time()
-        try:
-            pbar = tqdm(total=len(ind_S))
-            while len(ind_S) > 0:
-                s = ind_S.pop(0)
-                if isConvexCombination(X, ind_E, s) is not None:
-                     if isConvexCombination(X, ind_S, s) is not None:
-                         ind_E.append(s)
-                         pbar.update(1)
-                     else:
-                         ind_S.append(s)
             pbar.close()
         except Exception as e:
             print(e)
