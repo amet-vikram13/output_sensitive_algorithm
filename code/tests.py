@@ -1,8 +1,5 @@
-import numpy as np
-
 from experiments import *
 from utils import *
-from unittest import result
 
 
 def getPreData_X():
@@ -46,15 +43,37 @@ def test_isNotConvexCombination():
 
 def test_isConvexCombination_data(path):
     X_c = np.load(path).get("X")
+    non_convex_pts = []
     for i in range(len(X_c)):
         print("Processing",i,"th point")
         ind_E = np.arange(len(X_c)).tolist()
         ind_E.remove(i)
-        assert isConvexCombination(X_c, ind_E, i) is not None
-    print("----- isConvexCombination_data() passed -----\n")
+        if isConvexCombination(X_c, ind_E, i) is not None :
+            non_convex_pts.append(i)
+            print(non_convex_pts)
+    np.savez(
+        coresets_path + "_clarkson_cs_non_convex_pts.npz",
+        X=non_convex_pts
+    )
+    print("----- isConvexCombination_data() complete -----\n")
 
 def test_ijcnn1_convex_combination_upper_bound():
     X, y = load_data("ijcnn1")
+
+    s = np.random.choice(X.shape[0])
+
+    ind_E = np.setdiff1d(np.arange(len(X)), s).tolist()
+
+    t_start = time()
+    print("Is point s convex combination of remaining points:",isConvexCombination(X, ind_E, s) is None)
+    t_end = time()
+
+    print("Time taken: ", t_end-t_start)
+
+    print("----- ijcnn1_convex_combination_upper_bound() passed -----\n")
+
+def test_song_convex_combination_upper_bound():
+    X, y = load_data("song")
 
     s = np.random.choice(X.shape[0])
 
@@ -97,6 +116,7 @@ def run_tests():
 
     ## Special cases
     # test_ijcnn1_convex_combination_upper_bound()
+    # test_song_convex_combination_upper_bound()
     # test_ijcnn1_clarkson_coreset(m=1679)
     # test_isConvexCombination_data(results_path + "ijcnn1_clarkson_coreset.npz")
 
