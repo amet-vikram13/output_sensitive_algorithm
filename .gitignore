@@ -1,0 +1,7 @@
+.idea
+_gurobi_lp
+**/*.json
+**/__pycache__/**
+**/*.so
+**/*.ipynb
+**/__ipynb_checkpoints/**

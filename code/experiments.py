@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import ray
-import numpy as np
-from tqdm import tqdm
 from time import time
 
-from coresets import *
+import ray
+
 from archetypalanalysis import *
+from coresets import *
 
 
 def experiment_AA_full(X, k):
@@ -146,6 +145,40 @@ def experiment_AA_lucic_coreset(X, k, m, repetitions):
         res.append(rss)
     return res, res_time
 
+def experiment_AA_clarkson_coreset(X, k, dataset):
+    res = []
+    res_time = []
+
+    t_start = time()
+
+    # initialize two extreme points via farthestPointsSetUsingMinMax function
+    # maintain the initialized indices as set E. Note: len(E) < len(X)
+    # maintain the indices not belonging to E as set S. Note: len(S) = len(X) - len(E)
+    # any index not belonging to E is a candidate for the next coreset
+    ind_E = farthestPointsSetUsingMinMax(X)
+    ind_S = np.setdiff1d(np.arange(len(X)), np.array(ind_E)).tolist()
+
+    # obtain initial coreset using Clarkson's algorithm
+    X_C = clarkson_coreset(X, ind_E, ind_S, dataset)
+
+    # initialize archetypes via FurthestSum
+    ind = FurthestSum(X_C, k)
+    Z_init = X_C[ind].copy()
+
+    # run Archetypal Analysis
+    Z, A, B, rss = ArchetypalAnalysis(X_C, Z_init, k)
+
+    t_end = time()
+    runtime = t_end - t_start
+    print(len(rss))
+
+    # recompute the load matrix on all data (just to be sure)
+    A = ArchetypalAnalysis_compute_A(X, Z)
+
+    # measure the error on all data
+    rss = RSS_Z(X, A, Z)
+
+    return rss, runtime, len(X_C)
 
 def experiment_AA_uniform_sample_parallel(X, k, m, repetitions, parallel=10):
     reps = int(repetitions / parallel)
