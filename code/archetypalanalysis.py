@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gurobipy as gp
 import numpy as np
-from gurobipy import GRB
 from tqdm import tqdm
 
 try:
@@ -160,57 +158,6 @@ def weightedArchetypalAnalysis(
 
     return Z, A, B, rss[1:]
 
-# Determines whether a point s is a convex combination
-# of the points in the set E.
-# Returns None if s is a convex combination of E,
-# otherwise returns a witness vector that certifies
-# that s is not a convex combination of E.
-def isConvexCombination(X, ind_E, s):
-    E = X[ind_E].copy()
-    P = X[s].copy()
-
-    # initialize the dimensions of the data
-    k = E.shape[0]
-    d = E.shape[1]
-
-    # initialize the model and parameters
-    model = gp.Model("ConvexCombination")
-    model.setParam("OutputFlag", 0)
-
-    # adding model variables -- the lambda coefficients of the convex combination equation should be between 0 and 1
-    lambdas = model.addMVar((k,), lb=0.0, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="lambdas")
-
-    # adding model constraints -- the sum of the lambda coefficients should be 1
-    model.addConstr(lambdas.sum() == 1, name="sum_of_lambdas")
-
-    # adding model constraints -- the convex combination equation => E.T x lambdas = P
-    model.addMConstr(E.T, lambdas, '=', P, "convex_combination_equation")
-
-    model.setParam("InfUnbdInfo", 1)
-
-    # optimize the model
-    # model.write("_gurobi_lp/convex_combination.lp")
-    model.optimize()
-
-    if model.status == GRB.OPTIMAL:
-        return None
-    else:
-        # model.computeIIS()
-        # model.write("_gurobi_lp/convex_combination.ilp")
-
-        # Computing the Farkas dual, when model is infeasible.
-        # The Farkas dual is a certificate of infeasibility.
-        # It is a vector that satisfies the following conditions:
-        # y.T * A * x <= y.T * b
-        # when the original problem : A * x = b is infeasible.
-        # Here y will be our witness vector.
-        dual = []
-        for i in range(d):
-            constr = model.getConstrByName("convex_combination_equation[{}]".format(i))
-            assert constr is not None
-            dual.append(constr.getAttr(GRB.Attr.FarkasDual))
-        return np.array(dual)
-
 def FurthestSum(X, k):
     # Archetypal Analysis for Machine Learning
     # Morten Mørup and Lars Kai Hansen, 2010
@@ -251,19 +198,3 @@ def FurthestSum(X, k):
         pool.remove(i)
         chosen.append(i)
     return chosen
-
-# finds set of points that are farthest apart
-# using simple min max along each dimension of X
-def farthestPointsSetUsingMinMax(X):
-    n = X.shape[0]
-    d = X.shape[1]
-
-    ind_E = set()
-
-    for i in range(d):
-        p1 = X[:,i].argmin()
-        p2 = X[:,i].argmax()
-        ind_E.add(p1)
-        ind_E.add(p2)
-
-    return list(ind_E)

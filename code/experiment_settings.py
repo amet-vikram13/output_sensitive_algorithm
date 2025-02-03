@@ -3,7 +3,6 @@
 
 data_path = "/data/local/AA/data/"
 results_path = "/data/local/AA/results/"
-coresets_path = "/data/local/AA/results/coresets/"
 
 # specify list of sample sizes m
 M = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000]

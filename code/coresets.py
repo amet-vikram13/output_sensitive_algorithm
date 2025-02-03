@@ -3,12 +3,6 @@
 
 import numpy as np
 
-from archetypalanalysis import isConvexCombination
-from experiment_settings import coresets_path
-from time import time
-from tqdm import tqdm
-
-
 # "uniform" in the paper
 def uniform_sample(X, m):
     n = X.shape[0]
@@ -85,51 +79,3 @@ def coreset(X, m):
     X_C = X[ind]
     w_C = 1 / (m * q[ind])
     return X_C, w_C
-
-
-# proposed coreset
-# "clarkson-cs" in the paper "More output-sensitive geometric algorithms"
-def clarkson_coreset(X, ind_E, ind_S, dataset_name):
-    X_C = np.empty((1, 1))
-    try:
-        data = np.load(coresets_path + dataset_name + "_clarkson_coreset.npz")
-        X_C = data["X"]
-    except FileNotFoundError:
-        t_start = time()
-        try:
-            pbar = tqdm(total=len(ind_S), desc="clarkson-cs computation:")
-            while len(ind_S) > 0:
-                if len(ind_E) % 1000 == 0:
-                    pbar.write(
-                        "Current Size of coreset: {}".format(len(ind_E)))
-                    pbar.write(
-                        "Remaining points to process:: {}".format(len(ind_S)))
-                s = ind_S.pop(0)
-                witness_vector = isConvexCombination(X, ind_E, s)
-                if witness_vector is not None:
-                    max_dot_product = np.dot(-1*witness_vector, X[s])
-                    p_prime = None
-                    for p in ind_S:
-                        dot_product = np.dot(-1*witness_vector, X[p])
-                        if dot_product > max_dot_product:
-                            max_dot_product = dot_product
-                            p_prime = p
-                    if p_prime is not None:
-                        ind_E.append(p_prime)
-                        ind_S.append(s)
-                        ind_S.remove(p_prime)
-                    else:
-                        ind_E.append(s)
-                pbar.update(1)
-            pbar.close()
-        except Exception as e:
-            print(e)
-        X_C = X[ind_E].copy()
-        t_end = time()
-        np.savez(
-            coresets_path + dataset_name + "_clarkson_coreset.npz",
-            X=X_C,
-            cs_time=t_end - t_start
-        )
-    finally:
-        return X_C
