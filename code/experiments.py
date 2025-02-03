@@ -6,6 +6,7 @@ from time import time
 import ray
 
 from archetypalanalysis import *
+from clarkson_coreset_algorithm.clarkson import computeClarksonCoreset
 from coresets import *
 
 
@@ -151,7 +152,7 @@ def experiment_AA_clarkson_coreset(X, k, dataset):
 
     t_start = time()
 
-
+    X_C = computeClarksonCoreset(X, dataset)
 
     # initialize archetypes via FurthestSum
     ind = FurthestSum(X_C, k)

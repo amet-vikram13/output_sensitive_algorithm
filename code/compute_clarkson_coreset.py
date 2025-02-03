@@ -4,6 +4,7 @@
 import sys
 from time import time
 
+from clarkson_coreset_algorithm.clarkson import computeClarksonCoreset
 from utils import *
 
 
@@ -12,7 +13,7 @@ def compute_clarkson_coreset(dataset):
 
     t_start = time()
 
-    X_C = []
+    X_C = computeClarksonCoreset(X, dataset)
 
     t_end = time()
 

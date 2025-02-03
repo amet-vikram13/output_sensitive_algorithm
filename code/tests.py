@@ -1,4 +1,4 @@
-from experiments import *
+from clarkson_coreset_algorithm.clarkson import *
 from utils import *
 
 
@@ -101,7 +101,7 @@ def test_ijcnn1_clarkson_coreset(m=1000):
     print("Applying clarkson coreset algorithm")
     # takes too long to run
     t_start = time()
-    X_C = clarkson_coreset(X, ind_E, ind_S, "ijcnn1")
+    X_C = clarksonCoreset(X, ind_E, ind_S, "ijcnn1")
     t_end = time()
 
     print("Length of X_C: ", len(X_C))
