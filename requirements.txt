@@ -1,0 +1,8 @@
+scikit-learn
+scipy
+numpy
+ray
+gurobipy
+tqdm
+meson
+ninja

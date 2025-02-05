@@ -158,7 +158,6 @@ def weightedArchetypalAnalysis(
 
     return Z, A, B, rss[1:]
 
-
 def FurthestSum(X, k):
     # Archetypal Analysis for Machine Learning
     # Morten Mørup and Lars Kai Hansen, 2010

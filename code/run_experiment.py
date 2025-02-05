@@ -2,13 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import ray
 
-from utils import *
-from coresets import *
-from experiments import *
 from experiment_settings import *
-
+from experiments import *
+from utils import *
 
 ray.init()
 
@@ -19,6 +16,12 @@ np.random.seed(0)
 
 for k in [25, 100]:
     # k is the number of archetypes
+
+    # Archetypal Analysis on clarkson coreset
+    print("Archetypal Analysis on clarkson coreset")
+    res_clarkson_coreset = []
+    time_clarkson_coreset = []
+    rss_full_clarkson, time_full_clarkson, clarkson_cs_size = experiment_AA_clarkson_coreset(X, k, dataset)
 
     # Archetypal Analysis on all data
     print("Archetypal Analysis on all data")
@@ -86,4 +89,7 @@ for k in [25, 100]:
         time_lw_coreset=time_lw_coreset,
         rss_coreset=rss_coreset,
         time_coreset=time_coreset,
+        rss_full_clarkson=rss_full_clarkson,
+        time_full_clarkson=time_full_clarkson,
+        clarkson_cs_size=clarkson_cs_size
     )
