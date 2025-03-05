@@ -109,6 +109,44 @@ def test_ijcnn1_clarkson_coreset(m=1000):
 
     print("----- ijcnn1_clarkson_coreset() passed -----\n")
 
+def test_ijcnn1_clarkson_coreset_using_TA_CK(m=1000):
+    X, y = load_data("ijcnn1")
+
+    X = X[np.random.choice(X.shape[0], m, replace=False)]
+
+    print("Applying farthestPointsSetUsingMinMax algorithm")
+    ind_E = farthestPointsSetUsingMinMax(X)
+    print("Length of ind_E: ", len(ind_E))
+    print(ind_E)
+    ind_S = np.setdiff1d(np.arange(len(X)), np.array(ind_E)).tolist()
+
+    print("Applying clarkson coreset algorithm using CK")
+    # takes too long to run
+    t_start = time()
+    X_C_1 = clarksonCoreset(X, ind_E, ind_S, "ijcnn1", "CK")
+    t_end = time()
+
+    print("Applying clarkson coreset algorithm using TA")
+    # takes too long to run
+    t_start = time()
+    X_C_2 = clarksonCoreset(X, ind_E, ind_S, "ijcnn1", "TA")
+    t_end = time()
+
+    print("Length of CK X_C: ", len(X_C_1))
+    print("Time taken: ", t_end-t_start)
+
+    print("Length of TA X_C: ", len(X_C_2))
+    print("Time taken: ", t_end - t_start)
+
+    assert len(X_C_1) == len(X_C_2)
+
+    sorted_list1 = sorted(X_C_1)
+    sorted_list2 = sorted(X_C_2)
+
+    assert np.array_equal(sorted_list1, sorted_list2)
+
+    print("----- TA CK algo check passed -----\n")
+
 def run_tests():
     test_farthestPointsSetUsingMinMax()
     test_isConvexCombination()
