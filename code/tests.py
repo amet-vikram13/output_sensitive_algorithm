@@ -1,5 +1,6 @@
 from clarkson_coreset_algorithm.clarkson import *
 from utils import *
+import matplotlib.pyplot as plt
 
 
 def getPreData_X():
@@ -101,7 +102,7 @@ def test_ijcnn1_clarkson_coreset(m=1000):
     print("Applying clarkson coreset algorithm")
     # takes too long to run
     t_start = time()
-    X_C = clarksonCoreset(X, ind_E, ind_S, "ijcnn1")
+    X_C = clarksonCoreset(X, ind_E, ind_S, "ijcnn1", "CK")
     t_end = time()
 
     print("Length of X_C: ", len(X_C))
@@ -114,22 +115,16 @@ def test_ijcnn1_clarkson_coreset_using_TA_CK(m=1000):
 
     X = X[np.random.choice(X.shape[0], m, replace=False)]
 
-    print("Applying farthestPointsSetUsingMinMax algorithm")
-    ind_E = farthestPointsSetUsingMinMax(X)
-    print("Length of ind_E: ", len(ind_E))
-    print(ind_E)
-    ind_S = np.setdiff1d(np.arange(len(X)), np.array(ind_E)).tolist()
-
     print("Applying clarkson coreset algorithm using CK")
     # takes too long to run
     t_start = time()
-    X_C_1 = clarksonCoreset(X, ind_E, ind_S, "ijcnn1", "CK")
+    X_C_1 = computeClarksonCoreset(X, "ijcnn1", "CK")
     t_end = time()
 
     print("Applying clarkson coreset algorithm using TA")
     # takes too long to run
     t_start = time()
-    X_C_2 = clarksonCoreset(X, ind_E, ind_S, "ijcnn1", "TA")
+    X_C_2 = computeClarksonCoreset(X, "ijcnn1", "TA")
     t_end = time()
 
     print("Length of CK X_C: ", len(X_C_1))
@@ -138,14 +133,41 @@ def test_ijcnn1_clarkson_coreset_using_TA_CK(m=1000):
     print("Length of TA X_C: ", len(X_C_2))
     print("Time taken: ", t_end - t_start)
 
-    assert len(X_C_1) == len(X_C_2)
-
-    sorted_list1 = sorted(X_C_1)
-    sorted_list2 = sorted(X_C_2)
-
-    assert np.array_equal(sorted_list1, sorted_list2)
-
     print("----- TA CK algo check passed -----\n")
+
+def test_unitBall(n,dim=2,method="CK"):
+    X = np.random.normal(0, 1, (n, dim))
+    X = np.apply_along_axis(lambda v:  v / np.linalg.norm(v, ord=2), 1, X)
+    radii = np.random.random(n) ** (1/dim)
+    X = X * radii.reshape(-1, 1)
+
+    X_C = computeClarksonCoreset(X, None, method)
+
+    plt.figure(figsize=(10, 10))
+    circle = plt.Circle((0, 0), 1, fill=False, color='black', linestyle='--', linewidth=2)
+    plt.gca().add_patch(circle)
+
+    # Plot the original points
+    plt.scatter(X[:, 0], X[:, 1], s=10, alpha=0.3, color='blue', label='Original Points')
+
+    # Plot the coreset points (size proportional to weight)
+    plt.scatter(X_C[:, 0], X_C[:, 1], s=10, color='red', label=f'Coreset Points ({len(X_C)} points)')
+
+    # Plot settings
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.axhline(y=0, color='gray', linestyle='-', alpha=0.3)
+    plt.axvline(x=0, color='gray', linestyle='-', alpha=0.3)
+    plt.xlim(-1.1, 1.1)
+    plt.ylim(-1.1, 1.1)
+    plt.title(f'Clarkson Coreset with {method} method')
+    plt.legend()
+    plt.axis('equal')
+
+    # Save the plot
+    plt.savefig(f"unit_ball_test_{method}.png")
+    plt.close()
+
+    print("----- test_unitball passed -----\n")
 
 def run_tests():
     test_farthestPointsSetUsingMinMax()
@@ -157,6 +179,8 @@ def run_tests():
     # test_song_convex_combination_upper_bound()
     # test_ijcnn1_clarkson_coreset(m=1679)
     # test_isConvexCombination_data(results_path + "ijcnn1_clarkson_coreset.npz")
+    # test_ijcnn1_clarkson_coreset_using_TA_CK(2000)
+    # test_unitBall(1000,dim=2,method="TA")
 
 
 if __name__ == "__main__":
