@@ -20,7 +20,7 @@ def load_data(dataset, standardize=False):
         X = np.asarray(X.todense())
     elif dataset == "ijcnn1":  # (49990, 22)
         # https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary.html
-        X, y = load_svmlight_file(data_path + "ijcnn1/ijcnn1")
+        X, y = load_svmlight_file(data_path + "ijcnn1.bz2")
         X = np.asarray(X.todense())
     elif dataset == "song":  # (515345, 90)
         # YearPredictionMSD is a subset of the Million Song Dataset

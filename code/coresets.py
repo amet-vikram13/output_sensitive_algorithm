@@ -3,7 +3,6 @@
 
 import numpy as np
 
-
 # "uniform" in the paper
 def uniform_sample(X, m):
     n = X.shape[0]
